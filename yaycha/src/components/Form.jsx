@@ -1,0 +1,42 @@
+
+import {useRef} from "react";
+
+
+import {
+    Box,
+    TextField,
+    Button,
+} from "@mui/material";
+// eslint-disable-next-line react/prop-types
+export default function Form({add}){
+
+
+    const contentRef = useRef();
+  
+
+    return (
+        <form 
+        onSubmit={e=>{
+            e.preventDefault();
+            const content = contentRef.current.value;
+
+            add(content,"Alice");
+            e.currentTarget.reset();
+        }}>
+        <Box sx={{mb:4, textAlign: "right"}}>
+            <TextField
+            inputRef={contentRef}
+            type="text"
+            placeholder="Content"
+            fullWidth
+            multiline
+            sx={{mb:1}}/>
+        </Box>
+        <Button
+        variant="contained"
+        type="submit">
+            Post
+        </Button>
+        </form>
+    )
+}
