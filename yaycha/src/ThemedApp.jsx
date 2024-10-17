@@ -1,9 +1,10 @@
-
 import { useState, createContext, useContext, useMemo } from "react";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import { deepPurple, grey } from "@mui/material/colors";
+
+import { QueryClientProvider, QueryClient } from "react-query";
 
 import Template from "./Template";
 import Home from "./pages/Home";
@@ -52,6 +53,9 @@ const router = createBrowserRouter([
 	},
 ]);
 
+// eslint-disable-next-line react-refresh/only-export-components
+export const queryClient = new QueryClient();
+
 export default function ThemedApp() {
 	const [showDrawer, setShowDrawer] = useState(false);
 	const [showForm, setShowForm] = useState(false);
@@ -87,7 +91,9 @@ export default function ThemedApp() {
 					mode,
 					setMode,
 				}}>
-				<RouterProvider router={router} />
+				<QueryClientProvider client={queryClient}>
+					<RouterProvider router={router} />
+				</QueryClientProvider>
 				<CssBaseline />
 			</AppContext.Provider>
 		</ThemeProvider>

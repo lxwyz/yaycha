@@ -1,41 +1,70 @@
-import {useState} from "react";
-
-import { Box } from "@mui/material";
+import { Alert, Box } from "@mui/material";
 
 import Form from "../components/Form";
 import Item from "../components/Item";
 
 import { useApp } from "../ThemedApp";
 
-export default function Home(){
-    const {showForm,setGlobalMsg} = useApp();
+import { useQuery, useMutation } from "react-query";
+import { queryClient } from "../ThemedApp";
 
-    const [data, setData] = useState([
-        { id: 3, content: "Yay, interesting.", name: "Chris" },
-        { id: 2, content: "React is fun.", name: "Bob" },
-        { id: 1, content: "Hello, World!", name: "Alice" },
-    ]);
+const api = import.meta.env.VITE_API;
+console.log("API URL:", api);
 
-    const remove = id => {
-        setData(data.filter(item => item.id!== id));
-        setGlobalMsg("An item deleted");
-    };
+export default function Home() {
+	const { showForm, setGlobalMsg } = useApp();
+	const { isLoading, isError, error, data } = useQuery("posts", async () => {
+		const res = await fetch(`${api}/content/posts`);
+     
+		return res.json();
+	});
 
-    const add = (content,name) => {
-        const id = data[0].id + 1;
-        setData([{ id, content, name },...data]);
-        setGlobalMsg("An item added");
-    };
+	const remove = useMutation(
+		async id => {
+			await fetch(`${api}/content/posts/${id}`, {
+				method: "DELETE",
+			});
+		},
+		{
+			onMutate: id => {
+				queryClient.cancelQueries("posts");
+				queryClient.setQueryData("posts", old =>
+					old.filter(item => item.id !== id)
+				);
+				setGlobalMsg("A post deleted");
+			},
+		}
+	);
 
-    return(
-        <Box>
-            {showForm && <Form add={add}/>}
+	const add = () => {
+		setGlobalMsg("A post added");
+	};
 
-            {data.map(item=>{
-                return(
-                    <Item key={item.id} item={item} remove={remove}/>
-                )
-            })}
-        </Box>
-    )
+	if (isError) {
+		return (
+			<Box>
+				<Alert severity="warning">{error.message}</Alert>
+			</Box>
+		);
+	}
+
+	if (isLoading) {
+		return <Box sx={{ textAlign: "center" }}>Loading...</Box>;
+	}
+
+	return (
+		<Box>
+			{showForm && <Form add={add} />}
+
+			{data.map(item => {
+				return (
+					<Item
+						key={item.id}
+						item={item}
+						remove={remove.mutate}
+					/>
+				);
+			})}
+		</Box>
+	);
 }

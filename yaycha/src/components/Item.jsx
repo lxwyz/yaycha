@@ -1,5 +1,4 @@
 /* eslint-disable react/prop-types */
-
 import { Box, Card, CardContent, Typography, IconButton } from "@mui/material";
 
 import {
@@ -12,8 +11,9 @@ import { useNavigate } from "react-router-dom";
 
 import { green } from "@mui/material/colors";
 
-// eslint-disable-next-line react/prop-types
-export default function Item({ item, remove, primary }) {
+import { formatRelative } from "date-fns";
+
+export default function Item({ item, remove, primary, comment }) {
 	const navigate = useNavigate();
 
 	return (
@@ -21,7 +21,10 @@ export default function Item({ item, remove, primary }) {
 			{primary && <Box sx={{ height: 50, bgcolor: green[500] }} />}
 
 			<CardContent
-				onClick={() => navigate("/comments/1")}
+				onClick={() => {
+					if (comment) return false;
+					navigate(`/comments/${item.id}`);
+				}}
 				sx={{ cursor: "pointer" }}>
 				<Box
 					sx={{
@@ -43,7 +46,7 @@ export default function Item({ item, remove, primary }) {
 						<Typography
 							variant="caption"
 							sx={{ color: green[500] }}>
-							A few second ago
+							{formatRelative(item.created, new Date())}
 						</Typography>
 					</Box>
 					<IconButton
@@ -73,7 +76,7 @@ export default function Item({ item, remove, primary }) {
 						fontSize="12"
 						color="info"
 					/>
-					<Typography variant="caption">{item.name}</Typography>
+					<Typography variant="caption">{item.user.name}</Typography>
 				</Box>
 			</CardContent>
 		</Card>
